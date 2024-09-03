@@ -50,7 +50,7 @@ int main()
     //----------------------Nebula variables--------------------------
     Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
     //AnimData for nebula
-    const int sizeOfNebulae{20};
+    const int sizeOfNebulae{4};
     AnimData nebulae[sizeOfNebulae]{};
 
     for (int i = 0; i < sizeOfNebulae; i++)
@@ -105,6 +105,8 @@ int main()
     float bgX{};
     float mgX{};
     float fgX{};
+
+    bool collision{false};
 
     SetTargetFPS(60);
     while(!WindowShouldClose())
@@ -197,14 +199,47 @@ int main()
             nebulae[i] = updateAnimData(nebulae[i], dT, 7);
         }
 
-        for(int i = 0; i < sizeOfNebulae; i++)
+        for (AnimData nebula : nebulae)
         {
-            //Draw nebula
-            DrawTextureRec(nebula, nebulae[i].rec, nebulae[i].pos, WHITE);
+            float pad{50};
+            Rectangle nebRec{
+                nebula.pos.x + pad,
+                nebula.pos.y + pad,
+                nebula.rec.width - 2 * pad,
+                nebula.rec.height - 2 * pad
+            };
+            Rectangle scarfyRec{
+                scarfyData.pos.x,
+                scarfyData.pos.y,
+                scarfyData.rec.width,
+                scarfyData.rec.height,
+            };
+            if (CheckCollisionRecs(nebRec, scarfyRec))
+            {
+                collision = true;
+            }
         }
 
-        //drawing scarfy
-        DrawTextureRec(scarfy, scarfyData.rec, scarfyData.pos, WHITE);
+        if (collision)
+        {
+            //Game Over
+            DrawText("Game Over!", windowDimensions[0]/5, windowDimensions[1]/2, 60, RED);
+        }
+        else if (scarfyData.pos.x >= finishLine)
+        {
+            DrawText("You Win!", windowDimensions[0]/4, windowDimensions[1]/2, 60, GREEN);
+        }
+        else
+        {
+            for(int i = 0; i < sizeOfNebulae; i++)
+            {
+                //Draw nebula
+                DrawTextureRec(nebula, nebulae[i].rec, nebulae[i].pos, WHITE);
+            }
+
+            //drawing scarfy
+            DrawTextureRec(scarfy, scarfyData.rec, scarfyData.pos, WHITE);
+        }
 
         //Stop Drawing
         EndDrawing();
